@@ -5,10 +5,9 @@
 package com.r7studio.ioserver;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.snmp4j.CommunityTarget;
-
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.TransportMapping;
@@ -30,6 +29,8 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
  * @author leutholl
  */
 public abstract class SnmpAgent {
+    
+    private static Logger logger = Logger.getLogger(SnmpAgent.class);
 
     private SnmpAgent() {
     }
@@ -76,29 +77,25 @@ public abstract class SnmpAgent {
                         //System.out.println("Snmp Get Response = " + responsePDU.get(0).toValueString());
                         data = responsePDU.get(0).toValueString();
                     } else {
-                        Logger.getLogger(SnmpAgent.class.getName()).log(Level.WARNING,
-                                "snmpGet: ResponsePDU Error: Status= {0} Index={1} Text= {2}",
-                                new Object[]{errorStatus, errorIndex, errorStatusText});
-                        
+                        logger.warn("snmpGet: ResponsePDU Error: Status="+errorStatus+" index="+errorIndex+" Text="+errorStatusText);
                     }
                 } else {
-                    Logger.getLogger(SnmpAgent.class.getName()).log(Level.WARNING, "snmpGet: Response PDU is null");
+                    logger.warn("snmpGet: Response PDU is null!");
                     return null;
                 }
             } else {
-                Logger.getLogger(SnmpAgent.class.getName()).log(Level.WARNING, "Agent Timeout... ");
+                logger.warn("SNMP agent Timeout...");
                 return null;
             }
             snmp.close();
         } catch (IOException ex) {
-            Logger.getLogger(SnmpAgent.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
         }
         return data;
     }
 
-    public static void snmpSet(String host, String port, String community, String strOID, int Value) {      
-        Logger.getLogger(SnmpAgent.class.getName()).log(Level.INFO, "snmpSet: host={0} port={1} community={2} OID={3} value={4}", 
-                new Object[]{host, port, community, strOID, Value});
+    public static void snmpSet(String host, String port, String community, String strOID, int Value) {  
+        logger.info("snmpSet: host="+host+" port="+port+" community="+community+" OID="+strOID+" value="+Value);
         host = host + "/" + port;
         Address tHost = GenericAddress.parse(host);
         Snmp snmp;
@@ -124,15 +121,14 @@ public abstract class SnmpAgent {
                     strResponse = event.getResponse();
                     if (strResponse != null) {
                         result = strResponse.getErrorStatusText();
-                        Logger.getLogger(SnmpAgent.class.getName()).log(Level.WARNING, "snmpSet Response=null. Set Status is: {0}",
-                                result);
+                        logger.warn("SnmpSet Response = null. Set Status is: "+result);
                     }
                 }
             };
             snmp.send(pdu, target, null, listener);
             snmp.close();
-        } catch (Exception e) {
-            Logger.getLogger(SnmpAgent.class.getName()).log(Level.SEVERE, null, e);
+        } catch (Exception ex) {
+            logger.error(ex);
         }
     }
 
@@ -159,7 +155,7 @@ public abstract class SnmpAgent {
             Snmp snmp = new Snmp(new DefaultUdpTransportMapping());
             snmp.send(trap, target, null, null);
         } catch (IOException ex) {
-            Logger.getLogger(SnmpAgent.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
         }
 
     }

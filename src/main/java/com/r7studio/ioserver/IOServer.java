@@ -7,8 +7,6 @@ package com.r7studio.ioserver;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 //import javax.xml.ws.Endpoint;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -19,7 +17,12 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
+//slf4j-log4j12
+//slf4j-api-1.6.1jar
+//dom4j
 /**
  *
  * @author leutholl
@@ -37,6 +40,8 @@ public class IOServer {
     private static boolean terminated = false;
     private final static Object TERMINATION_LOCK = new Integer(2);
     private static Thread hook;
+    
+    private static Logger logger = Logger.getRootLogger();
 
     /**
      * @param args the command line arguments
@@ -45,11 +50,12 @@ public class IOServer {
         try {
             
             
-            Logger  logger = Logger.getLogger("org.apache");
-            Logger nlogger = Logger.getLogger("org.apache.log4j");
+            //Logger  logger = Logger.getLogger("org.apache");
+            //Logger nlogger = Logger.getLogger("org.apache.log4j");
 
-            Logger.getLogger(SnomIOServer.class.getName()).setLevel(Level.WARNING);
-            Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).setLevel(Level.WARNING);
+            logger.setLevel(Level.ALL);
+            
+          
             
             hook = new IOServer.ShutdownHook();
             hook.setName("Hook");
@@ -85,9 +91,9 @@ public class IOServer {
                     "IOServer running.");
             System.out.println("IOServer running.");
         } catch (IOException ex) {
-            Logger.getLogger(IOServer.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
         } catch (IllegalArgumentException ex) {
-            Logger.getLogger(IOServer.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
         } finally {
             Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO,
                     "IOServer running.");
@@ -102,7 +108,7 @@ public class IOServer {
                     }
                 }
             } catch (InterruptedException ex) {
-                Logger.getLogger(IOServer.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error(ex);
             }
 
             System.exit(0); //call Hook
@@ -179,8 +185,7 @@ public class IOServer {
             hib_session_factory = new Configuration().configure().
                     buildSessionFactory();
             if (hib_session_factory.isClosed()) {
-                Logger.getLogger(SnomIOServer.class.getName()).log(Level.SEVERE,
-                        "Could not create Session Factory to Derby!");
+                logger.error("Could not create Session Factory to Derby!");
                 return false;
             }
 
@@ -193,12 +198,11 @@ public class IOServer {
 
 
             if (!hib_session.isConnected()) {
-                Logger.getLogger(SnomIOServer.class.getName()).log(Level.SEVERE,
-                        "Could not connect to Derby!");
+                logger.error("Could not connect to Derby!");
                 return false;
             }          
         } catch (SQLException ex) {
-            Logger.getLogger(IOServer.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
             return false;
         }
         return true;
@@ -230,7 +234,7 @@ public class IOServer {
                 System.out.println("Exiting IOServer...");
                 System.out.println("bye!");
             } catch (InterruptedException ex) {
-                Logger.getLogger(IOServer.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error(ex);
             }
         }
     }

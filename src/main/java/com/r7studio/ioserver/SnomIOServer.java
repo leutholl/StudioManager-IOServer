@@ -24,8 +24,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
@@ -76,10 +76,12 @@ public class SnomIOServer extends Thread {
              
     protected static final Object TERMINATION_LOCK = new Integer(1);
     protected static final int TIMEOUT = 5; //5 seconds
+    
+    private static Logger logger = Logger.getLogger(SnomIOServer.class);
 
     public SnomIOServer() {
-        Logger.getLogger(SnomIOServer.class.getName()).setLevel(Level.WARNING);
-
+        logger.setLevel(Level.WARN);
+      
         //Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 
         Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO,
@@ -92,7 +94,7 @@ public class SnomIOServer extends Thread {
             httpSnomServer = HttpServer.create(
                     new InetSocketAddress(8080), 10);
         } catch (IOException ex) {
-            Logger.getLogger(SnomIOServer.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
         }
 
         httpSnomServer.createContext("/csta", new MySnomXmlHandler());
@@ -107,26 +109,21 @@ public class SnomIOServer extends Thread {
         //IOBoard List
         List<Ioboard> ioboards = (List<Ioboard>) IOServer.hib_session.createQuery("from Ioboard").list();
         if (ioboards.isEmpty()) {
-            Logger.getLogger(SnomIOServer.class.getName()).log(Level.WARNING,
-                    "No IOBoard registered!");
+            logger.warn("No IOBoard registered!");
         } else {
             Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO,
                     "list of IOBoards:");
             for (Ioboard io : ioboards) {
                 // handle each IOBoard
-                Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO,
-                        "reaching IOBoard at: {0}...", io.getIp());
+                logger.info("reaching IOBoard at: "+io.getIp()+"...");
                 String temp = SnmpAgent.snmpGet(io.getIp(), IOServer.SNMP_PORT, IOServer.SNMP_COMMUNITY, ".1.3.6.1.4.1.32111.1.3.4.10");
                 if (temp == null) {
-                    Logger.getLogger(SnomIOServer.class.getName()).log(Level.SEVERE,
-                            "can''t reach IOBoard with registered IP:{0}", io.getIp());
+                    logger.error("Can't reach IOBoard with registered IP: "+io.getIp());
                     return;
                 }
                 io.setTemp(new Integer(temp));
                 IOServer.hib_session.saveOrUpdate(io);
-                Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO,
-                        "successfully reached IOBoard: {0} of Type {1}. Temperature is {2} C",
-                        new Object[]{io.getIp(), io.getType(), io.getTemp()});
+                logger.info("Successfully reached IOBoard: "+io.getIp()+" of type "+io.getType()+". Temperature is "+io.getTemp()+" C.");
             }
         }
 
@@ -140,8 +137,7 @@ public class SnomIOServer extends Thread {
                 "list of channels:");
         for (Channel ch : channels) {
             // handle each channel
-            Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO, "channel: {0} state: {1} action: {2}",
-                    new Object[]{ch.getAddress(), ch.getValue(), ch.getOid()});
+            logger.info("Channel: "+ch.getAddress()+ " state: "+ch.getValue()+" action: "+ch.getOid());
         }
 
         IOServer.hib_session.flush();
@@ -155,20 +151,17 @@ public class SnomIOServer extends Thread {
         Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO, "Starting SOAP Server");
         httpSnomServer.start();
 
-        Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO, "SOAP Server listening on port: {0}",
-                httpSnomServer.getAddress().getPort());
+        logger.info("SOAP Server listening on port: "+httpSnomServer.getAddress().getPort());
         
         try {
             synchronized (TERMINATION_LOCK) {
                 while (!terminated) TERMINATION_LOCK.wait();
             }
-            Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO,
-                    "SnomIOServer shutting down... Force quiting in {0} seconds", TIMEOUT);
-            System.out.println("SnomIOServer shutting down... Force quiting in " + TIMEOUT + " seconds");          
+            logger.info("SnomIOServer shutting down... Force quiting in "+TIMEOUT+" seconds");       
             httpSnomServer.stop(TIMEOUT); //force quite after 5 seconds
             System.out.println("SnomIOServer stopped.");
         } catch (InterruptedException ex) {
-            Logger.getLogger(SnomIOServer.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
         }
 
     }
@@ -196,9 +189,7 @@ public class SnomIOServer extends Thread {
         Transaction t = IOServer.hib_session.beginTransaction();
         Channel ch = (Channel) IOServer.hib_session.get(Channel.class, (short) button);
         short val = ch.getValue();
-        Logger.getLogger(SnomIOServer.class.getName()).log(Level.FINE,
-                "registerKeyPress pre-DB: button: {0} is {1}",
-                new Object[]{button, ch.getValue()});
+        logger.debug("registerKeyPress pre-DB: button: "+button+" is "+ch.getValue());
         //toggle value
         if (val == 0) {
             ch.setValue((short) 1);
@@ -221,8 +212,7 @@ public class SnomIOServer extends Thread {
             //IOBoard
             List<Ioboard> ioboards = (List<Ioboard>) IOServer.hib_session.createQuery("from Ioboard").list();
             if (ioboards.isEmpty()) {
-                Logger.getLogger(SnomIOServer.class.getName()).log(Level.WARNING,
-                        "Can't execute action. no IOBoard registered!");
+                logger.warn("Can't execute action. no IOBoard registered!");
             } else {
                 for (Ioboard io : ioboards) {
                     //we use val as we have to send it inverted and val is still the original value which is inverted.
@@ -231,9 +221,7 @@ public class SnomIOServer extends Thread {
             }
         }
 
-        Logger.getLogger(SnomIOServer.class.getName()).log(Level.FINE,
-                "registerKeyPress post-DB, post-SNMP: button: {0} is {1}",
-                new Object[]{button, ch.getValue()});
+        logger.debug("registerKeyPress post-DB: button: "+button+" is "+ch.getValue());
 
         return ch.getValue();
 
@@ -242,8 +230,7 @@ public class SnomIOServer extends Thread {
     private boolean syncLeds(short address) {
 
         List<Snomclient> clients = (List<Snomclient>) IOServer.hib_session.createQuery("from Snomclient").list();
-        Logger.getLogger(SnomIOServer.class.getName()).log(Level.FINE,
-                "syncLeds for all hosts with channel: {0}", address);
+        logger.debug("syncLeds for all hosts with channel: "+address);
         for (Snomclient cl : clients) {
             syncOneOrAllLeds(cl.getIp(), address);
         }
@@ -293,8 +280,7 @@ public class SnomIOServer extends Thread {
         }
 
         //else syncLEDs
-        Logger.getLogger(SnomIOServer.class.getName()).log(Level.FINE,
-                "syncLeds for host: {0} channel: {1}", new Object[]{remoteHostname, address});
+        logger.debug("syncLeds for host: "+remoteHostname+" channel: "+address);
         for (Channel ch : channels) {
             // handle each channel
             if (ch.getValue() == 1) {
@@ -319,8 +305,7 @@ public class SnomIOServer extends Thread {
     }
 
     private boolean registerSnomClient(InetSocketAddress remoteHostname) {
-        Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO,
-                "register client: {0}", remoteHostname.getHostName());
+        logger.info("register client: "+remoteHostname.getHostName());
         Snomclient client = new Snomclient(remoteHostname.getHostName());
         Transaction t = IOServer.hib_session.beginTransaction();
         IOServer.hib_session.saveOrUpdate(client);
@@ -335,11 +320,8 @@ public class SnomIOServer extends Thread {
 
 
 
-        Logger.getLogger(SnomIOServer.class.getName()).log(Level.INFO,
-                "controlLED: addr={0} state={1} color={2} ip={3}",
-                new Object[]{addr, freq, color,
-            remoteHostname});
-
+        logger.info("ControlLed: addr="+addr+" state="+freq+" color="+color+" ip="+remoteHostname);
+        
         // set the connection timeout value to 30 seconds (30000 milliseconds)
         final HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 10000);
@@ -403,14 +385,13 @@ public class SnomIOServer extends Thread {
             method.setURI(uri);
             hrb = ((HttpUriRequest) method);
         } catch (URISyntaxException ex) {
-            Logger.getLogger(SnomIOServer.class.getName()).log(Level.SEVERE,
-                    null, ex);
+            logger.error(ex);
         }
 
 
         String uristr = method.getRequestLine().getUri();
-        Logger.getLogger(SnomIOServer.class.getName()).log(Level.FINE, "controlLED HTTP-GET: {0}", uristr);
-
+        logger.info("controlLED HTTP-GET: "+uristr);
+        
         HttpResponse response;
 
         try {
@@ -418,7 +399,7 @@ public class SnomIOServer extends Thread {
 
             // Examine the response status
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                Logger.getLogger(SnomIOServer.class.getName()).log(Level.SEVERE, response.getStatusLine().getReasonPhrase());
+                logger.error("Error in response: "+response.getStatusLine().getReasonPhrase());
                 return;
             }
 
@@ -469,8 +450,7 @@ public class SnomIOServer extends Thread {
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(SnomIOServer.class.getName()).log(Level.SEVERE,
-                    null, ex);
+            logger.error(ex);
         }
 
     }
@@ -492,27 +472,23 @@ public class SnomIOServer extends Thread {
 
                 //printing remote Hostname
                 InetSocketAddress remoteHostname = he.getRemoteAddress();
-                Logger.getLogger(MySnomHtmlHandler.class.getName()).log(Level.INFO, "RemoteAdress: {0}",
-                        he.getRemoteAddress().getHostName());
-
+                logger.debug("RemoteAddress: "+he.getRemoteAddress().getHostName());
+                
                 //printing Header URI
-                Logger.getLogger(MySnomHtmlHandler.class.getName()).log(Level.INFO, "Request URI: {0}",
-                        he.getRequestURI().toASCIIString());
-                Logger.getLogger(MySnomHtmlHandler.class.getName()).log(Level.INFO, "Request URI Parameters: ");
-
+                logger.debug("Request URI: "+ he.getRequestURI().toASCIIString());
+                
+                logger.debug("Request URI Parameters: ");
                 //see if dummy.htm
                 if (he.getRequestURI().toASCIIString().equals("/dummy.htm")) {
                     sync++;
-                    Logger.getLogger(MySnomHtmlHandler.class.getName()).log(Level.INFO,
-                            "dummy.htm called. We're counting to two: {0}", sync);
+                    logger.info("dummy.htm called. We're counting to two: "+sync);
                 }
 
                 Map params = (Map) he.getAttribute("parameters");
                 List<String> keys = new ArrayList<String>(params.keySet());
                 Collections.sort(keys);
                 for (String key : keys) {
-                    Logger.getLogger(MySnomHtmlHandler.class.getName()).log(Level.FINE,
-                            "Param [{0}]:{1}", new Object[]{key, params.get(key)});
+                    logger.debug("Param ["+key+"]:"+params.get(key));
                 }
 
                 int key = 0;
@@ -522,11 +498,9 @@ public class SnomIOServer extends Thread {
                     try {
                         key = Integer.parseInt(s.substring(1));
                     } catch (NumberFormatException ex) {
-                        Logger.getLogger(SnomIOServer.class.getName()).log(
-                                Level.SEVERE, null, ex);
+                        logger.error(ex);                                
                     }
-                    Logger.getLogger(MySnomHtmlHandler.class.getName()).log(Level.INFO,
-                            "keypressed: {0}", key);
+                    logger.debug("keypressed: "+key);
                     registerKey = true;
                 }
 
@@ -536,13 +510,10 @@ public class SnomIOServer extends Thread {
                 InputStream is = he.getRequestBody();
                 byte[] b = new byte[1500];
                 is.read(b);
-                Logger.getLogger(MySnomHtmlHandler.class.getName()).log(Level.INFO,
-                        "Request Body: {0}", new String(b));
-
+                logger.info("Request Body: "+new String(b));
                 String response = "OK";
                 he.sendResponseHeaders(200, response.length());
-                Logger.getLogger(MySnomHtmlHandler.class.getName()).log(Level.INFO,
-                        "Response: {0}", response);
+                logger.info("Response: "+response);
                 OutputStream os = he.getResponseBody();
                 if (os != null) {
                     os.write(response.getBytes());
@@ -557,8 +528,7 @@ public class SnomIOServer extends Thread {
                  */
                 //do something AFTER sending the initial response!
                 if (sync >= 2) {
-                    Logger.getLogger(MySnomHtmlHandler.class.getName()).log(Level.WARNING,
-                            "client: {0} needs LED sync!", he.getRemoteAddress());
+                    logger.warn("Client: "+he.getRemoteAddress()+" needs LED sync!");
                     syncOneOrAllLeds(he.getRemoteAddress().getHostName(), (short) -1); //syncAll
                     sync = 0; //could possibly be removed as handle() quits anyway.
                 }
@@ -568,8 +538,7 @@ public class SnomIOServer extends Thread {
                 }
 
             } catch (IOException ex) {
-                Logger.getLogger(MySnomHtmlHandler.class.getName()).log(
-                        Level.SEVERE, null, ex);
+                logger.error(ex);
             }
 
         }
@@ -613,8 +582,7 @@ public class SnomIOServer extends Thread {
                 String method = "";
                 for (int i = 0; i < nodes.getLength(); i++) {
                     method = nodes.item(i).getLocalName();
-                    Logger.getLogger(MySnomXmlHandler.class.getName()).log(
-                            Level.INFO, "Method Call: {0}", method);
+                    logger.debug("Method Call: "+method);
                 }
 
                 //find file with method as file name
@@ -639,8 +607,7 @@ public class SnomIOServer extends Thread {
                 } else {
                     String response = "not found";
                     t.sendResponseHeaders(500, response.length());
-                    Logger.getLogger(MySnomXmlHandler.class.getName()).log(
-                            Level.SEVERE, "Response not found. Check xml!");
+                    logger.error("Response not found. Check xml!");
                     OutputStream os = t.getResponseBody();
                     if (os != null) {
                         os.write(response.getBytes());
@@ -649,11 +616,8 @@ public class SnomIOServer extends Thread {
                     }
                 }
 
-
-
             } catch (XPathExpressionException ex) {
-                Logger.getLogger(MySnomXmlHandler.class.getName()).log(
-                        Level.SEVERE, null, ex);
+                logger.error(ex);
             }
         }
     }
