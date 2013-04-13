@@ -73,12 +73,12 @@ public class SnomIOServer extends Thread {
         41, 42, 43, 44, 45, 46, 47, 48, //page 3 right 41..48
     };
     public static boolean terminated = false; //set this to true and I will exit
-    
+             
     protected static final Object TERMINATION_LOCK = new Integer(1);
     protected static final int TIMEOUT = 5; //5 seconds
 
     public SnomIOServer() {
-        Logger.getLogger(SnomIOServer.class.getName()).setLevel(Level.ALL);
+        Logger.getLogger(SnomIOServer.class.getName()).setLevel(Level.WARNING);
 
         //Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 
