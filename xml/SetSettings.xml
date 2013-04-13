@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:csta="http://www.ecma-international.org/standards/ecma-323/csta/ed4">
+ <SOAP-ENV:Body>
+  <csta:SetSettingsResponse></csta:SetSettingsResponse>
+ </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+

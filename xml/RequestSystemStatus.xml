@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Header/>
+  <SOAP-ENV:Body>
+    <csta:RequestSystemStatusResponse xmlns:csta="http://www.ecma-international.org/standards/ecma-323/csta/ed5">
+      <csta:systemStatus>normal</csta:systemStatus>
+    </csta:RequestSystemStatusResponse>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

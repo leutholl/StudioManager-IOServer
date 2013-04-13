@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 09.04.2013 00:39:29 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class name="com.r7studio.ioserver.Ioboard" schema="APP" table="IOBOARD">
+    <id name="ip" type="string">
+      <column length="30" name="IP"/>
+      <generator class="assigned"/>
+    </id>
+    <property name="type" type="string">
+      <column length="20" name="TYPE" not-null="true"/>
+    </property>
+    <property name="temp" type="java.lang.Integer">
+      <column name="TEMP" precision="5" scale="0"/>
+    </property>
+  </class>
+</hibernate-mapping>

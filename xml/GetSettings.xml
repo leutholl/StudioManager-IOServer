@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:csta="http://www.ecma-international.org/standards/ecma-323/csta/ed4">
+ <SOAP-ENV:Body>
+  <csta:GetSettingsResponse>   <csta:Setting>
+    <csta:name>
+     mac
+    </csta:name>
+    <csta:value>
+     68a86d0ca62c    
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     phone_type
+    </csta:name>
+    <csta:value>
+     snom870-SIP    
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     firmware_version
+    </csta:name>
+    <csta:value>
+     snom870-SIP 8.4.29    
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     use_hidden_tags
+    </csta:name>
+    <csta:value>
+     on    
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_name1
+    </csta:name>
+    <csta:value>
+     1010    
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_name2
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_name3
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_name4
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_realname1
+    </csta:name>
+    <csta:value>
+     PA    
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_realname2
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_realname3
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_realname4
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_host1
+    </csta:name>
+    <csta:value>
+     sip.dwellin.me    
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_host2
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_host3
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     user_host4
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_incoming_url
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_outgoing_url
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_connected_url
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_disconnected_url
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_hold
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_unhold
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_transfer
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_blind_transfer
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_attended_transfer
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_offhook_url
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_onhook_url
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_missed_url
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_vision_url
+    </csta:name>
+    <csta:value>
+     http://192.168.2.109:80/ExtensionGuiModule/actionUrlListener?local=$local&amp;remote=$remote&amp;active_url=$active_url&amp;active_user=$active_user&amp;active_host=$active_host&amp;csta_id=$csta_id&amp;action=$action&amp;led_nr=$led_nr&amp;led_freq=$led_freq&amp;led_color=$led_color    
+    </csta:value>
+   </csta:Setting>
+   <csta:Setting>
+    <csta:name>
+     action_firewall_test
+    </csta:name>
+    <csta:value>
+         
+    </csta:value>
+   </csta:Setting>
+  <csta:Setting>
+    <csta:name>
+     led_offset
+    </csta:name>
+    <csta:value>
+      0   
+    </csta:value>
+   </csta:Setting>
+  <csta:Setting>
+    <csta:name>
+     key_offset
+    </csta:name>
+    <csta:value>
+      0   
+    </csta:value>
+   </csta:Setting>
+
+</csta:GetSettingsResponse>
+ </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
