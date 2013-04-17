@@ -5,7 +5,6 @@
 package com.r7studio.ioserver;
 
 import java.io.IOException;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
@@ -94,8 +93,8 @@ public abstract class SnmpAgent {
         return data;
     }
 
-    public static void snmpSet(String host, String port, String community, String strOID, int Value) {  
-        logger.info("snmpSet: host="+host+" port="+port+" community="+community+" OID="+strOID+" value="+Value);
+    public synchronized static void snmpSet(String host, String port, String community, String strOID, int Value) {  
+        logger.info("...snmpSet: host="+host+" port="+port+" community="+community+" OID="+strOID+" value="+Value);
         host = host + "/" + port;
         Address tHost = GenericAddress.parse(host);
         Snmp snmp;
@@ -132,7 +131,7 @@ public abstract class SnmpAgent {
         }
     }
 
-    public static void sendTrap(String oid, int value) {
+    public synchronized static void sendTrap(String oid, int value) {
         try {
             // create a protocol data-unit for the snmp-trap
             PDU trap = new PDU();
