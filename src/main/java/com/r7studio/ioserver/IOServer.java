@@ -9,6 +9,7 @@ import org.hibernate.SessionFactory;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -31,6 +32,8 @@ import org.hibernate.service.ServiceRegistryBuilder;
 public class IOServer {
 
     static protected SnomIOServer snomIoServer = null;
+    static protected MidiAgent midiAgent = null;
+    static protected ModtronixAgent modAgent = null;
     private static SessionFactory hib_session_factory;
     protected static Session hib_session;
     protected final static String SNMP_COMMUNITY = "private";
@@ -41,6 +44,7 @@ public class IOServer {
     private static Thread hook;
     private static Logger logger = Logger.getRootLogger();
     private static ServiceRegistry serviceRegistry;
+    
 
     /**
      * @param args the command line arguments
@@ -67,6 +71,20 @@ public class IOServer {
                 System.exit(0);
             }
 
+            logger.info("Initializing Modtronix Boards");
+            modAgent = new ModtronixAgent();
+            modAgent.initModule();
+
+            modAgent.clearLCD();
+
+            //------------------12345678901234567890
+            modAgent.writeLCD1("====================");
+            modAgent.writeLCD2("     STARTING UP    ");
+            modAgent.writeLCD3("     please wait    ");
+            modAgent.writeLCD4("====================");
+            Thread.sleep(2000);
+
+
             logger.info("Creating Snom Service");
             snomIoServer = new SnomIOServer(); //create server
             logger.info("Initializing Snom Service");
@@ -74,21 +92,78 @@ public class IOServer {
             Thread.currentThread().setName("IOServer");
             logger.info("Starting Snom Service");
             snomIoServer.start(); //run the Thread
-
             Thread.sleep(1000);
+            //----------------12345678901234567890
+            modAgent.rollLCD("SnomIO Srv.: started");
+
+
             logger.info("Initializing REST Service");
             HttpServer server = HttpServerFactory.create(BASE_URI);
             logger.info("Starting REST Service");
             server.start();
+            //----------------12345678901234567890
+            modAgent.rollLCD("REST Srv.:   started");
             logger.info("...listening for REST calls on: " + BASE_URI);
+
+            Thread.sleep(750);
+
+
+            //listen for I2C Messages and send init string
+            logger.info("Starting I2C listener");
+            modAgent.startI2CListener();
+            modAgent.sendI2C("Successfully started!");
+            //----------------12345678901234567890
+            modAgent.rollLCD("I2C Srv.:    started");
+
+            Thread.sleep(750);
+
+            //register and listen for Events
+            //first listen then register
+            //otherwise the listener gets all the queued UDP datagrams in one rush
+            logger.info("Starting event listener");
+            modAgent.startEventListener();
+            //----------------12345678901234567890
+            modAgent.rollLCD("Event Srv.:  started");
+
+            Thread.sleep(750);
+
+            logger.info("registering for events");
+            modAgent.registerForEvents();
+            //----------------12345678901234567890
+            modAgent.rollLCD("registering events  ");
+
+            Thread.sleep(750);
+
+            logger.info("Starting MIDI listener");
+            midiAgent = new MidiAgent();
+            midiAgent.queryPortsAndListen();
+            //----------------12345678901234567890
+            modAgent.rollLCD("MIDI Srv.:  started");
 
             logger.info("IOServer running. Call " + BASE_URI + "/ioserver/exit to quit the application");
             logger.info("------------------------------------------------------------------------------");
 
+            Thread.sleep(1000);
+
+            //modAgent.backlightLCD(1);
+            //modAgent.contrastLCD(1);
+            //modAgent.clearLCD();
+            //modAgent.backlightLCD(1);
+            //modAgent.contrastLCD(1);
+            //------------------12345678901234567890
+            modAgent.writeLCD1("====================");
+            modAgent.writeLCD2("     successfuly    ");
+            modAgent.writeLCD3("      started!      ");
+            modAgent.writeLCD4("====================");
+            /**
+             * for (short i=0;i<=255;i+=10) { modAgent.backlightLCD(i);
+             * Thread.sleep(10); modAgent.contrastLCD(i); Thread.sleep(650); }
+             */
             try {
                 synchronized (TERMINATION_LOCK) {
                     while (!terminated) {
-                        TERMINATION_LOCK.wait();
+                        TERMINATION_LOCK.wait(1000);
+                        //modAgent.heartbeatLCD();
                     }
                 }
             } catch (InterruptedException ex) {
@@ -108,14 +183,24 @@ public class IOServer {
 
     }
 
+    public static void onI2CKey(int key, InetAddress host) {
+        logger.info("onI2Ckey: " + key);
+        if (key == 10) {
+            //ringer
+            if (snomIoServer != null) {
+                snomIoServer.onSnomKeyPress(10);
+            }
+        }
+    }
+
     @GET
     @Path("/onSnomKeyPress")
     @Produces(MediaType.TEXT_PLAIN)
     public String onSnomKeyPress(@QueryParam("key") int key) {
         Thread.currentThread().setName("REST Handler");
         int val = snomIoServer.onSnomKeyPress(key);
-        logger.info("REST: onSnomKeyPress() key=" + key + ":"+val);
-        return ""+val;
+        logger.info("REST: onSnomKeyPress() key=" + key + ":" + val);
+        return "" + val;
     }
 
     @GET
@@ -124,7 +209,7 @@ public class IOServer {
     public String getOneOrAllLeds(@QueryParam("key") short key) {
         Thread.currentThread().setName("REST Handler");
         String result = snomIoServer.syncOneOrAllLeds(null, key);
-        logger.info("REST: getOneOrAllLeds() key=" + key+ ":"+result);
+        logger.info("REST: getOneOrAllLeds() key=" + key + ":" + result);
         return result;
     }
 
@@ -220,12 +305,53 @@ public class IOServer {
             Thread.currentThread().setName("main Shutdown Hook");
             try {
                 logger.warn("IOServer Shutdown Hook called.");
+
+                //modAgent.clearLCD();
+                //------------------12345678901234567890
+                modAgent.writeLCD1("====================");
+                modAgent.writeLCD2("   SHUTTING DOWN    ");
+                modAgent.writeLCD3("    please wait     ");
+                modAgent.writeLCD4("====================");
+
+                /**
+                 * for (short i=255;i>=1;i--) { modAgent.backlightLCD(i);
+                 * modAgent.contrastLCD(i); Thread.sleep(50); }
+                 */
+                logger.info("deregistering for events");
+                modAgent.deregisterForEvents();
+                Thread.sleep(1000); //wait so that datagrams currently on the way won't disturb log
+                //----------------12345678901234567890
+                modAgent.rollLCD("deregistering events");
+
+                logger.info("shutting down MIDI listener");
+                midiAgent.closeAllListener();
+                Thread.sleep(333);
+                //----------------12345678901234567890
+                modAgent.rollLCD("MIDI handler:  stopd");
+
+
+                logger.info("shutting down event listener");
+                modAgent.stopEventListener();
+                Thread.sleep(333);
+                //----------------12345678901234567890
+                modAgent.rollLCD("Event handler: stopd");
+
+
+                logger.info("shutting down I2C listener");
+                modAgent.stopI2CListener();
+                Thread.sleep(333);
+                //----------------12345678901234567890
+                modAgent.rollLCD("I2C handler:   stopd");
+
                 logger.info("shutting down SnomIOServer");
                 SnomIOServer.terminated = true;
                 synchronized (SnomIOServer.TERMINATION_LOCK) {
                     SnomIOServer.TERMINATION_LOCK.notify();
                 }
                 Thread.sleep((1000L * SnomIOServer.TIMEOUT + 1));
+                //----------------12345678901234567890
+                modAgent.rollLCD("SnomIO serv:   stopd");
+
                 if (IOServer.hib_session != null) {
                     if (IOServer.hib_session.isConnected()) {
                         logger.info("Derby session closing...");
@@ -234,9 +360,18 @@ public class IOServer {
                         if (IOServer.hib_session.isOpen()) {
                             IOServer.hib_session.close();    // close connection to Java DB
                         }
+                        //----------------12345678901234567890
+                        modAgent.rollLCD("Derby sess.:   stopd");
                         logger.info("Derby session closed.");
                     }
                 }
+                Thread.sleep(333);
+                //----------------12345678901234567890
+                modAgent.rollLCD("------- BYE -------");
+                Thread.sleep(2000);
+                modAgent.clearLCD();
+                Thread.sleep(2000);
+                modAgent.homeScreen();
                 logger.warn("Exiting IOServer...");
             } catch (InterruptedException ex) {
                 logger.error(ex);

@@ -78,6 +78,15 @@ public class SnomIOServer extends Thread {
     private static Logger logger = Logger.getLogger(SnomIOServer.class);
     private HttpParams httpParams = new BasicHttpParams();
     private DefaultHttpClient httpclient;
+    private boolean logToLCD;
+
+    public boolean isLogToLCD() {
+        return logToLCD;
+    }
+
+    public void setLogToLCD(boolean logToLCD) {
+        this.logToLCD = logToLCD;
+    }
 
     public SnomIOServer() {
     }
@@ -193,6 +202,7 @@ public class SnomIOServer extends Thread {
         short val = ch.getValue();
 
         logger.debug("onSnomKeyPress pre-DB: button: " + button + " is " + ch.getValue());
+
         //toggle value
         if (val == 0) {
             ch.setValue((short) 1);
@@ -227,7 +237,9 @@ public class SnomIOServer extends Thread {
         }
 
         logger.debug("onSnomKeyPress post-DB: button: " + button + " is " + ch.getValue());
-
+        if (this.logToLCD) {
+            IOServer.modAgent.rollLCD("Key: " + button + ":" + ch.getValue());
+        }
         return ch.getValue();
 
     }
@@ -236,8 +248,16 @@ public class SnomIOServer extends Thread {
 
         List<Snomclient> clients = (List<Snomclient>) IOServer.hib_session.createQuery("from Snomclient").list();
         logger.debug("syncLeds for all hosts with channel: " + address);
+        //-------------------------12345678901234567890
+        if (this.logToLCD) {
+            IOServer.modAgent.rollLCD("syncLEDs for:       ");
+        }
         for (Snomclient cl : clients) {
             syncOneOrAllLeds(cl.getIp(), address);
+            //-------------------------12345678901234567890
+            if (this.logToLCD) {
+                IOServer.modAgent.rollLCD("-> " + cl.getIp());
+            }
         }
         IOServer.hib_session.flush();
         return true;
@@ -314,6 +334,12 @@ public class SnomIOServer extends Thread {
 
     private boolean registerSnomClient(InetSocketAddress remoteHostname) {
         logger.info("Register Snom client: " + remoteHostname.getHostName());
+        
+        if (this.logToLCD) {
+            //-------------------------12345678901234567890
+            IOServer.modAgent.rollLCD("Register Snom:      ");
+            IOServer.modAgent.rollLCD("-> " + remoteHostname.getHostName());
+        }
         Snomclient client = new Snomclient(remoteHostname.getHostName());
         Transaction t = IOServer.hib_session.beginTransaction();
         IOServer.hib_session.saveOrUpdate(client);
@@ -453,7 +479,7 @@ public class SnomIOServer extends Thread {
 
         @Override
         public synchronized void handle(HttpExchange he) throws IOException {
-           
+
 
             Thread.currentThread().setName("SnomIOServer:HTML");
 
@@ -475,7 +501,7 @@ public class SnomIOServer extends Thread {
             }
 
             Map params = (Map) he.getAttribute("parameters");
-            
+
             if (logger.isEnabledFor(Level.DEBUG)) {
                 List<String> keys = new ArrayList<String>(params.keySet());
                 Collections.sort(keys);
@@ -530,7 +556,7 @@ public class SnomIOServer extends Thread {
                 logger.info("processing keypress");
                 onSnomKeyPress(keyAddrToChannel(key));
             }
-            
+
         }
     }
 

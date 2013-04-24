@@ -1,5 +1,5 @@
 package com.r7studio.ioserver;
-// Generated 09.04.2013 00:39:28 by Hibernate Tools 3.2.1.GA
+// Generated 19.04.2013 20:14:23 by Hibernate Tools 3.2.1.GA
 
 
 

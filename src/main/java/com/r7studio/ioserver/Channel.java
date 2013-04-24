@@ -1,5 +1,5 @@
 package com.r7studio.ioserver;
-// Generated 09.04.2013 00:39:28 by Hibernate Tools 3.2.1.GA
+// Generated 19.04.2013 20:14:23 by Hibernate Tools 3.2.1.GA
 
 
 
@@ -16,6 +16,7 @@ public class Channel  implements java.io.Serializable {
      private Short offMode;
      private Short offColor;
      private String oid;
+     private String i2c;
 
     public Channel() {
     }
@@ -25,7 +26,7 @@ public class Channel  implements java.io.Serializable {
         this.address = address;
         this.value = value;
     }
-    public Channel(short address, short value, Short onMode, Short onColor, Short offMode, Short offColor, String oid) {
+    public Channel(short address, short value, Short onMode, Short onColor, Short offMode, Short offColor, String oid, String i2c) {
        this.address = address;
        this.value = value;
        this.onMode = onMode;
@@ -33,6 +34,7 @@ public class Channel  implements java.io.Serializable {
        this.offMode = offMode;
        this.offColor = offColor;
        this.oid = oid;
+       this.i2c = i2c;
     }
    
     public short getAddress() {
@@ -83,6 +85,13 @@ public class Channel  implements java.io.Serializable {
     
     public void setOid(String oid) {
         this.oid = oid;
+    }
+    public String getI2c() {
+        return this.i2c;
+    }
+    
+    public void setI2c(String i2c) {
+        this.i2c = i2c;
     }
 
 

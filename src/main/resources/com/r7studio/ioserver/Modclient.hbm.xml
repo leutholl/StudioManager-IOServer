@@ -3,9 +3,9 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 19.04.2013 20:14:24 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class name="com.r7studio.ioserver.Snomclient" table="SNOMCLIENT" schema="APP">
+    <class name="com.r7studio.ioserver.Modclient" table="MODCLIENT" schema="APP">
         <id name="ip" type="string">
-            <column name="IP" length="20" />
+            <column name="IP" length="15" />
             <generator class="assigned" />
         </id>
     </class>

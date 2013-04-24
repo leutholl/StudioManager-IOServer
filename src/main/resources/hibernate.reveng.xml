@@ -5,4 +5,5 @@
   <table-filter match-name="IOBOARD"/>
   <table-filter match-name="SNOMCLIENT"/>
   <table-filter match-name="CHANNEL"/>
+  <table-filter match-name="MODCLIENT"/>
 </hibernate-reverse-engineering>

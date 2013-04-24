@@ -10,5 +10,6 @@
     <mapping resource="com/r7studio/ioserver/Snomclient.hbm.xml"/>
     <mapping resource="com/r7studio/ioserver/Channel.hbm.xml"/>
     <mapping resource="com/r7studio/ioserver/Ioboard.hbm.xml"/>
+    <mapping resource="com/r7studio/ioserver/Modclient.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>
