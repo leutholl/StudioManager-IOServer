@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 28.04.2013 03:04:57 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="ch.r7studio.studiomanager.pojo.Channel" table="CHANNEL" catalog="StudioManager">
+        <id name="id" type="java.lang.Integer">
+            <column name="ID" />
+            <generator class="identity" />
+        </id>
+        <property name="name" type="string">
+            <column name="NAME" length="50" />
+        </property>
+        <property name="description" type="string">
+            <column name="DESCRIPTION" length="100" />
+        </property>
+        <property name="trigger" type="string">
+            <column name="TRIGGER" length="200" />
+        </property>
+        <property name="action" type="string">
+            <column name="ACTION" length="200" />
+        </property>
+    </class>
+</hibernate-mapping>

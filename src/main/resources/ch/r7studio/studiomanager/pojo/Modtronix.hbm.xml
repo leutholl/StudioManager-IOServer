@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 28.04.2013 03:04:57 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="ch.r7studio.studiomanager.pojo.Modtronix" table="MODTRONIX" catalog="StudioManager">
+        <id name="ip" type="string">
+            <column name="IP" length="15" />
+            <generator class="assigned" />
+        </id>
+        <property name="description" type="string">
+            <column name="DESCRIPTION" length="100" />
+        </property>
+        <property name="location" type="string">
+            <column name="LOCATION" length="100" />
+        </property>
+        <property name="type" type="string">
+            <column name="TYPE" length="20" not-null="true" />
+        </property>
+        <property name="firmware" type="string">
+            <column name="FIRMWARE" length="20" />
+        </property>
+    </class>
+</hibernate-mapping>

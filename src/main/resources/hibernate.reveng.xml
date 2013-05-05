@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-reverse-engineering-3.0.dtd">
+<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-reverse-engineering-3.0.dtd">
 <hibernate-reverse-engineering>
-  <schema-selection match-schema="APP"/>
-  <table-filter match-name="IOBOARD"/>
-  <table-filter match-name="SNOMCLIENT"/>
+  <schema-selection match-catalog="StudioManager"/>
+  <table-filter match-name="BUSINESS_OBJECT"/>
+  <table-filter match-name="MODTRONIX"/>
+  <table-filter match-name="SNOMVISION_BUTTON"/>
   <table-filter match-name="CHANNEL"/>
-  <table-filter match-name="MODCLIENT"/>
+  <table-filter match-name="SNOMVISION"/>
+  <table-filter match-name="DAENETIP"/>
 </hibernate-reverse-engineering>

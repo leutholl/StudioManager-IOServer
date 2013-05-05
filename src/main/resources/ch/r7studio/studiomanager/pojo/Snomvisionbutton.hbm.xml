@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 28.04.2013 03:04:57 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="ch.r7studio.studiomanager.pojo.Snomvisionbutton" table="SNOMVISION_BUTTON" catalog="StudioManager">
+        <id name="address" type="int">
+            <column name="ADDRESS" />
+            <generator class="assigned" />
+        </id>
+        <property name="value" type="short">
+            <column name="VALUE" not-null="true" />
+        </property>
+    </class>
+</hibernate-mapping>
