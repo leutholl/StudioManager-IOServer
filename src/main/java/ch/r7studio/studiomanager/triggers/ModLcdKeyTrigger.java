@@ -14,7 +14,7 @@ public class ModLcdKeyTrigger extends Trigger {
     private String            i2c_address;
 
     public ModLcdKeyTrigger(char key, String i2c_address) {
-        super(TriggerType.ModLCDKEY);
+        super(E_TriggerType.ModLCDKEY);
         this.key = key;
         this.i2c_address = i2c_address;
     }
@@ -22,7 +22,7 @@ public class ModLcdKeyTrigger extends Trigger {
     @Override
     public String getTriggerString() {
         //dbformat is ModLCDKEY(key)[i2c_address]
-        return TriggerType.ModLCDKEY.name()+"("+key+")["+i2c_address+"]";
+        return E_TriggerType.ModLCDKEY.name()+"("+key+")["+i2c_address+"]";
     }
 
     /**

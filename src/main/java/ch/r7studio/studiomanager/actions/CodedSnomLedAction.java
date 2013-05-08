@@ -16,7 +16,7 @@ public class CodedSnomLedAction extends Action {
     private int key;
     
     public CodedSnomLedAction(String dbString) {
-        super(ActionType.CodedSnomLED);
+        super(E_ActionType.CodedSnomLED);
         
         this.key      = Integer.parseInt(Utils.betweenRundeKlammerInDbString(dbString));
         this.value    = Integer.parseInt(Utils.rightFromEquals(dbString));
@@ -25,7 +25,7 @@ public class CodedSnomLedAction extends Action {
     }
     
     public String getActionString() {
-        return ActionType.CodedSnomLED.name();
+        return E_ActionType.CodedSnomLED.name();
     }
 
     /**

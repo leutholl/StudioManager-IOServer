@@ -13,14 +13,14 @@ public class DummyAction extends Action {
     private String message = "";
     
     public DummyAction(String message) {
-        super(ActionType.Dummy);
+        super(E_ActionType.Dummy);
         this.message = message;
     }
     
 
     @Override
     public String getActionString() {
-         return ActionType.Dummy.name();
+         return E_ActionType.Dummy.name();
     }
 
     /**

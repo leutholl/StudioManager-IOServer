@@ -14,14 +14,14 @@ public class DummyTrigger extends Trigger {
     private String            from_ip;
     
     public DummyTrigger(String message, String from_ip) {
-        super(TriggerType.Dummy);
+        super(E_TriggerType.Dummy);
         this.message = message;
         this.from_ip = from_ip;
     }
 
     @Override
     public String getTriggerString() {
-        return TriggerType.Dummy.name()+"("+message+")["+from_ip+"]";
+        return E_TriggerType.Dummy.name()+"("+message+")["+from_ip+"]";
     }
 
     /**

@@ -12,9 +12,9 @@ public abstract class Action {
 
     private long timestamp;
     
-    private ActionType actiontype; 
+    private E_ActionType actiontype; 
     
-    public Action(ActionType actiontype) {
+    public Action(E_ActionType actiontype) {
         this.actiontype = actiontype;
         this.timestamp = System.currentTimeMillis();
     }
@@ -28,7 +28,7 @@ public abstract class Action {
     /**
      * @return the actiontype
      */
-    public ActionType getActiontype() {
+    public E_ActionType getActiontype() {
         return actiontype;
     }
     

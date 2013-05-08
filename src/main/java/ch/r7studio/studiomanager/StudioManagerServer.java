@@ -4,6 +4,7 @@
  */
 package ch.r7studio.studiomanager;
 
+import ch.r7studio.studiomanager.actions.DMXAction;
 import ch.r7studio.studiomanager.pojo.Snomvision;
 import ch.r7studio.studiomanager.pojo.Daenetip;
 import org.hibernate.Session;
@@ -11,12 +12,10 @@ import org.hibernate.SessionFactory;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.hibernate.cfg.Configuration;
@@ -32,19 +31,18 @@ import org.hibernate.service.ServiceRegistryBuilder;
  */
 @Path("/ioserver")
 public class StudioManagerServer {
-
+ 
     protected static SnomAgent      snomAgent  = null;
     protected static MidiAgent      midiAgent  = null;
     protected static ModtronixAgent modAgent   = null;
     protected static DummyAgent     dummyAgent = null;
     protected static SnmpAgent      snmpAgent  = null;
+    protected static DMXAgent       dmxAgent   = null;
     protected static BusinessAgent  boAgent    = null;
-    
+    protected static RestAgent      restAgent  = null;
     protected static ChannelHandler handler    = null;
-    
     protected static SessionFactory hib_session_factory;
-    protected static Session hib_session;
-    static final String BASE_URI = "http://127.0.0.1:8081/rest";
+    protected static Session        hib_session;
     private static boolean terminated = false;
     private final static Object TERMINATION_LOCK = new Integer(2);
     private static Thread hook;
@@ -59,25 +57,32 @@ public class StudioManagerServer {
     }
 
     private static void init() {
-        logger.info("Initializing IOServer");
+        logger.info("Initializing StudioManager");
         hook = new StudioManagerServer.ShutdownHook();
         Runtime.getRuntime().addShutdownHook(hook);
-        logger.info("Connecting to Derby");
+        logger.info("Connecting to DB");
         boolean buildDBSession = buildDBSession();
         if (buildDBSession) {
-            logger.info("...successfully connected to Derby");
+            logger.info("...successfully connected to DB");
         } else {
-            logger.fatal("...can't connect to Derby. Exiting.");
+            logger.fatal("...can't connect to DB. Exiting.");
             System.exit(0);
         }
-        
+
         handler = new ChannelHandler();
         handler.init();
-        
+
         logger.info("Starting up all Agents");
         logger.info(" --> Initializing BusinessObjectAgent");
         boAgent = new BusinessAgent();
         boAgent.addListener(handler);
+        
+        logger.info(" --> Initializing ModtronixAgent");
+        dmxAgent = new DMXAgent();
+        dmxAgent.doAction(new DMXAction("DMX(1)[192.168.1.185]=a127"));
+        
+        System.exit(0);
+        
         logger.info(" --> Initializing ModtronixAgent");
         modAgent = new ModtronixAgent();
         modAgent.initModule();
@@ -93,19 +98,41 @@ public class StudioManagerServer {
         snomAgent.start();
         logger.info(" --> Initializing MidiAgent");
         midiAgent = new MidiAgent();
-        midiAgent.addListener(handler);
-        logger.info(" ----> Query ports and listen");
-        midiAgent.queryPortsAndListen();
+        logger.info(" ----> Discovering MIDI ports");
+        int ports = midiAgent.init();
+        if (ports > 0) {
+            logger.info(" ----> using MIDI Agent");
+            midiAgent.addListener(handler);          
+        } else {
+            logger.warn(" ----> not using the MIDI Agent");
+        }
         logger.info(" --> Initializing SnmpAgent");
         snmpAgent = new SnmpAgent();
-        snmpAgent.addListener(handler);
-        logger.info(" ----> Discover DAENetIP Boards");
-        SnmpAgent.discoverDaeNetIpBoards();
+        logger.info(" ----> Discovering DAENetIP Boards");
+        if (SnmpAgent.discoverDaeNetIpBoards() > 0) {
+            logger.info(" ----> using SnmpAgent");
+            snmpAgent.addListener(handler);
+        } else {
+            logger.warn(" ----> nit using the SnmpAgent");
+        }
+        logger.info(" --> Initializing SnmpAgent");
+        
+
         //logger.info(" --> Initializing DummyAgent");
         //dummyAgent = new DummyAgent();
         //dummyAgent.addListener(handler);
-       
         
+        logger.info("Initializing REST Service");
+            restAgent = new RestAgent();
+            logger.info("Starting REST Service");
+            restAgent.start();
+            //----------------12345678901234567890
+            modAgent.rollLCD("REST Srv.:   started");
+            logger.info("...listening for REST calls on: " + CONFIG.BASE_URI);
+
+        logger.info("IOServer running. Call " + CONFIG.BASE_URI + "/ioserver/exit to quit the application");
+        logger.info("------------------------------------------------------------------------------");
+
     }
 
     private static void init2() {
@@ -153,17 +180,17 @@ public class StudioManagerServer {
 
 
             logger.info("Initializing REST Service");
-            HttpServer server = HttpServerFactory.create(BASE_URI);
+            HttpServer server = HttpServerFactory.create(CONFIG.BASE_URI);
             logger.info("Starting REST Service");
             server.start();
             //----------------12345678901234567890
             modAgent.rollLCD("REST Srv.:   started");
-            logger.info("...listening for REST calls on: " + BASE_URI);
+            logger.info("...listening for REST calls on: " + CONFIG.BASE_URI);
 
             Thread.sleep(750);
 
 
-            //listen for I2C Messages and send init string
+            //listen for I2C Messages and send start string
             logger.info("Starting I2C listener");
             modAgent.startI2CListener();
             modAgent.sendI2C("Successfully started!");
@@ -191,11 +218,11 @@ public class StudioManagerServer {
 
             logger.info("Starting MIDI listener");
             midiAgent = new MidiAgent();
-            midiAgent.queryPortsAndListen();
+            midiAgent.run();
             //----------------12345678901234567890
             modAgent.rollLCD("MIDI Srv.:  started");
 
-            logger.info("IOServer running. Call " + BASE_URI + "/ioserver/exit to quit the application");
+            logger.info("IOServer running. Call " + CONFIG.BASE_URI + "/ioserver/exit to quit the application");
             logger.info("------------------------------------------------------------------------------");
 
             Thread.sleep(1000);
@@ -277,7 +304,7 @@ public class StudioManagerServer {
     @GET
     @Path("/exit")
     @Produces(MediaType.TEXT_PLAIN)
-    public String exit() {
+    public static String exit() {
         Thread.currentThread().setName("REST Handler");
         logger.info("REST: exit called");
         terminated = true;
@@ -348,8 +375,11 @@ public class StudioManagerServer {
                 //----------------12345678901234567890
                 modAgent.rollLCD("deregistering events");
 
-                logger.info("shutting down MIDI listener");
-                midiAgent.closeAllListener();
+                while (midiAgent.hasListener()) {
+                    logger.info("shutting down MIDI listener");
+                    midiAgent.removeListener(handler);
+                    midiAgent.closeAllListener();
+                }
                 Thread.sleep(333);
                 //----------------12345678901234567890
                 modAgent.rollLCD("MIDI handler:  stopd");
@@ -379,15 +409,15 @@ public class StudioManagerServer {
 
                 if (StudioManagerServer.hib_session != null) {
                     if (StudioManagerServer.hib_session.isConnected()) {
-                        logger.info("Derby session closing...");
+                        logger.info("DB session closing...");
                         StudioManagerServer.hib_session.flush();
                         StudioManagerServer.hib_session.disconnect();
                         if (StudioManagerServer.hib_session.isOpen()) {
                             StudioManagerServer.hib_session.close();    // close connection to Java DB
                         }
                         //----------------12345678901234567890
-                        modAgent.rollLCD("Derby sess.:   stopd");
-                        logger.info("Derby session closed.");
+                        modAgent.rollLCD("DB session:   stopd");
+                        logger.info("DB session closed.");
                     }
                 }
                 Thread.sleep(333);

@@ -4,7 +4,6 @@
  */
 package ch.r7studio.studiomanager;
 
-import ch.r7studio.studiomanager.actions.Action;
 import ch.r7studio.studiomanager.triggers.TriggerEvent;
 import ch.r7studio.studiomanager.triggers.TriggerListener;
 
@@ -12,14 +11,14 @@ import ch.r7studio.studiomanager.triggers.TriggerListener;
  *
  * @author leutholl
  */
-public interface Agent {
-    
-    public boolean doAction(Action action);
+public interface I_InAgent {
     
     public void notifyTrigger(TriggerEvent event);
     
     public boolean addListener(TriggerListener toAdd);
 
     public boolean removeListener(TriggerListener toRemove);
+    
+    public boolean hasListener();
     
 }

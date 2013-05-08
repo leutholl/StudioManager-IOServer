@@ -34,7 +34,7 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
  *
  * @author leutholl
  */
-public class SnmpAgent implements Agent {
+public class SnmpAgent implements I_OutAgent {
 
     public List<TriggerListener> listeners = new ArrayList<TriggerListener>();
     private static Logger logger = Logger.getLogger(SnmpAgent.class);
@@ -42,7 +42,7 @@ public class SnmpAgent implements Agent {
     public SnmpAgent() {
     }
 
-    public static void discoverDaeNetIpBoards() {
+    public static int discoverDaeNetIpBoards() {
         //IOBoard List
         List<Daenetip> ioboards = (List<Daenetip>) StudioManagerServer.hib_session.createQuery("from Daenetip").list();
         if (ioboards.isEmpty()) {
@@ -63,8 +63,8 @@ public class SnmpAgent implements Agent {
                 }
             }
         }
-
         StudioManagerServer.hib_session.flush();
+        return ioboards.size();
     }
 
     public static String snmpGet(String ipAddress, int port, String community, String oid) {
@@ -89,15 +89,15 @@ public class SnmpAgent implements Agent {
             pdu.setType(PDU.GET);
             pdu.setRequestID(new Integer32(1));
 
-            // Create Snmp object for sending data to Agent
+            // Create Snmp object for sending data to InAgent
             Snmp snmp = new Snmp(transport);
 
-            //System.out.println("Sending Request to Agent...");
+            //System.out.println("Sending Request to InAgent...");
             ResponseEvent response = snmp.get(pdu, comtarget);
 
-            // Process Agent Response
+            // Process InAgent Response
             if (response != null) {
-                //System.out.println("Got Response from Agent");
+                //System.out.println("Got Response from InAgent");
                 PDU responsePDU = response.getResponse();
 
                 if (responsePDU != null) {
@@ -211,4 +211,9 @@ public class SnmpAgent implements Agent {
     public boolean removeListener(TriggerListener toRemove) {
         return listeners.remove(toRemove);
     }
+    
+    public boolean hasListener() {
+        return (listeners.size() > 0);
+    }
+    
 }

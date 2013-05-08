@@ -10,32 +10,32 @@ package ch.r7studio.studiomanager.actions;
  */
 public class SnomLedAction extends Action {
     
-    private SnomLedFreq      freq;
-    private SnomLedColor     color;
+    private E_SnomLedFreq      freq;
+    private E_SnomLedColor     color;
     private int              address;
     
-    public SnomLedAction(int address, SnomLedFreq freq, SnomLedColor color ) {
-        super(ActionType.SnomLED);
+    public SnomLedAction(int address, E_SnomLedFreq freq, E_SnomLedColor color ) {
+        super(E_ActionType.SnomLED);
         this.address = address;
         this.freq = freq;
         this.color = color;   
     }
     
     public String getActionString() {
-        return ActionType.SnomLED.name();
+        return E_ActionType.SnomLED.name();
     }
 
     /**
      * @return the freq
      */
-    public SnomLedFreq getFreq() {
+    public E_SnomLedFreq getFreq() {
         return freq;
     }
 
     /**
      * @return the color
      */
-    public SnomLedColor getColor() {
+    public E_SnomLedColor getColor() {
         return color;
     }
 

@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  * @author leutholl
  */
 @Path("/modtronix")
-public class ModtronixAgent extends Thread implements Agent {
+public class ModtronixAgent extends Thread implements I_InAgent, I_OutAgent {
     
     public List<TriggerListener> listeners = new ArrayList<TriggerListener>();
 
@@ -434,5 +434,9 @@ public class ModtronixAgent extends Thread implements Agent {
     public void notifyTrigger(TriggerEvent event) {
         for (TriggerListener tl : listeners)
             tl.handleTrigger(event);
+    }
+    
+    public boolean hasListener() {
+        return (listeners.size() > 0);
     }
 }

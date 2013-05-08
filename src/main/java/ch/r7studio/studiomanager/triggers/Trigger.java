@@ -10,11 +10,11 @@ package ch.r7studio.studiomanager.triggers;
  */
 public abstract class Trigger {
    
-    private final TriggerType triggerType;
+    private final E_TriggerType triggerType;
     private long timestamp;
     
     
-    public Trigger(TriggerType tt) {
+    public Trigger(E_TriggerType tt) {
         this.timestamp = System.currentTimeMillis();
         this.triggerType = tt;
     }
@@ -29,7 +29,7 @@ public abstract class Trigger {
     /**
      * @return the triggerType
      */
-    public TriggerType getTriggerType() {
+    public E_TriggerType getTriggerType() {
         return triggerType;
     }
     

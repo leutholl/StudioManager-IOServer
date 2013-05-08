@@ -7,8 +7,8 @@ package ch.r7studio.studiomanager;
 import ch.r7studio.studiomanager.actions.Action;
 import ch.r7studio.studiomanager.actions.CodedSnomLedAction;
 import ch.r7studio.studiomanager.actions.SnomLedAction;
-import ch.r7studio.studiomanager.actions.SnomLedColor;
-import ch.r7studio.studiomanager.actions.SnomLedFreq;
+import ch.r7studio.studiomanager.actions.E_SnomLedColor;
+import ch.r7studio.studiomanager.actions.E_SnomLedFreq;
 import ch.r7studio.studiomanager.pojo.Snomvisionbutton;
 import ch.r7studio.studiomanager.pojo.Snomvision;
 import ch.r7studio.studiomanager.triggers.SnomKeyTrigger;
@@ -58,7 +58,7 @@ import org.xml.sax.InputSource;
  *
  * @author leutholl
  */
-public class SnomAgent extends Thread implements Agent {
+public class SnomAgent extends Thread implements I_InAgent, I_OutAgent {
 
     
     private static int[] keyAdrMap = {
@@ -288,7 +288,7 @@ public class SnomAgent extends Thread implements Agent {
 
     }
 
-    protected Snomvisionbutton updateSnomvisionButton(int address, SnomLedFreq freq, SnomLedColor color) {
+    protected Snomvisionbutton updateSnomvisionButton(int address, E_SnomLedFreq freq, E_SnomLedColor color) {
         Snomvisionbutton b = getSnomvisionbutton(address);
         short value = (short) (freq.getCode() * 10 + color.getCode());
         b.setValue(value);
@@ -434,6 +434,10 @@ public class SnomAgent extends Thread implements Agent {
 
     public boolean removeListener(TriggerListener toRemove) {
         return listeners.remove(toRemove);
+    }
+    
+    public boolean hasListener() {
+        return (listeners.size() > 0);
     }
 
     public void notifyTrigger(TriggerEvent event) {

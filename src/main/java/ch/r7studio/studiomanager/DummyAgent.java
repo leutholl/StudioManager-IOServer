@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
  *
  * @author leutholl
  */
-public class DummyAgent implements Agent {
+public class DummyAgent implements I_InAgent, I_OutAgent {
     
     public List<TriggerListener> listeners = new ArrayList<TriggerListener>();
     
@@ -54,6 +54,10 @@ public class DummyAgent implements Agent {
 
     public boolean removeListener(TriggerListener toRemove) {
         return listeners.remove(toRemove);
+    }
+    
+    public boolean hasListener() {
+        return (listeners.size() > 0);
     }
     
 }

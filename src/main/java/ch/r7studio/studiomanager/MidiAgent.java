@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
  *
  * @author leutholl
  */
-public class MidiAgent implements Agent {
+public class MidiAgent implements I_InAgent {
     
     public List<TriggerListener> listeners = new ArrayList<TriggerListener>();
 
@@ -58,7 +58,7 @@ public class MidiAgent implements Agent {
    
 
     //public MidiAgent() {
-    protected void queryPortsAndListen() {
+    protected void run() {
 
         this.holdoff_ceaser = new Runnable() {
             public void run() {
@@ -69,6 +69,10 @@ public class MidiAgent implements Agent {
             }
         };
 
+       
+    }
+    
+    protected int init() {
         MidiDevice device;
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < infos.length; i++) {
@@ -105,11 +109,14 @@ public class MidiAgent implements Agent {
             } catch (MidiUnavailableException e) {
                 logger.warn(e);
             }
-
-            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(holdoff_ceaser, 0, 5, TimeUnit.SECONDS);
+            if (this.holdoff_ceaser == null) {
+                this.run();
+                ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+                executor.scheduleAtFixedRate(holdoff_ceaser, 0, 5, TimeUnit.SECONDS);
+            }
             
         }
+        return infos.length;
     }
     
     protected void closeAllListener() {
@@ -150,6 +157,10 @@ public class MidiAgent implements Agent {
 
     public boolean removeListener(TriggerListener toRemove) {
         return listeners.remove(toRemove);
+    }
+    
+    public boolean hasListener() {
+        return (listeners.size() > 0);
     }
 
     //tried to write my own class. I thought the send method handles an MidiEvents sent to it

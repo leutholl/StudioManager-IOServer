@@ -20,7 +20,7 @@ public class SnmpAction extends Action {
     private int    value;
     
     public SnmpAction(String host, String strOID, int value) {
-        super(ActionType.SNMP);
+        super(E_ActionType.SNMP);
         this.host   = host;
         this.strOID = strOID;
         this.value  = value;
@@ -28,7 +28,7 @@ public class SnmpAction extends Action {
     
     public SnmpAction(String dbString) {
         //Snmp(OID)[IP]=Value
-        super(ActionType.SNMP);
+        super(E_ActionType.SNMP);
         this.host = Utils.betweenEckigeKlammerInDbString(dbString);
         this.strOID = Utils.betweenRundeKlammerInDbString(dbString);
         this.value = Integer.parseInt(Utils.rightFromEquals(dbString));   
@@ -36,7 +36,7 @@ public class SnmpAction extends Action {
 
     @Override
     public String getActionString() {
-       return ActionType.SNMP.name();
+       return E_ActionType.SNMP.name();
     }
 
     /**

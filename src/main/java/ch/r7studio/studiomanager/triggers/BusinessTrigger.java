@@ -14,7 +14,7 @@ public class BusinessTrigger extends Trigger {
     private String            value;
 
     public BusinessTrigger(String object, String value) {
-        super(TriggerType.BObj);
+        super(E_TriggerType.BObj);
         this.object = object;
         this.value = value;
     }
@@ -22,7 +22,7 @@ public class BusinessTrigger extends Trigger {
     @Override
     public String getTriggerString() {
         //dbformat is BusinessObject(Bell)=On
-        return TriggerType.BObj.name()+"("+getObject()+")="+getValue();
+        return E_TriggerType.BObj.name()+"("+getObject()+")="+getValue();
     }
 
     public String getRundeKlammer() {

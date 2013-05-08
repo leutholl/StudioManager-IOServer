@@ -25,4 +25,14 @@ public class Utils {
         return dbString.substring(dbString.indexOf("=") + 1);
     }
     
+     private String getIPByte(String ip, int bytePos) {
+        String seg = (ip.split("\\."))[bytePos-1];
+        Integer val = Integer.parseInt(seg);
+        byte b = (byte)(val.intValue() & 0xFF);
+        byte[] bytes = { b };
+        String res = new String(bytes);
+        //logger.debug("IP:"+ip+"["+bytePos+"]="+res+" ["+val+"]");
+        return res;
+    }
+    
 }

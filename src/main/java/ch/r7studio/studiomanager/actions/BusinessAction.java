@@ -17,7 +17,7 @@ public class BusinessAction extends Action {
     
     
     public BusinessAction(String message) {
-        super(ActionType.BObj);
+        super(E_ActionType.BObj);
         this.object_name = Utils.betweenRundeKlammerInDbString(message);
         this.value = Utils.rightFromEquals(message);
     }
@@ -25,7 +25,7 @@ public class BusinessAction extends Action {
 
     @Override
     public String getActionString() {
-         return ActionType.BObj.name();
+         return E_ActionType.BObj.name();
     }
 
     /**

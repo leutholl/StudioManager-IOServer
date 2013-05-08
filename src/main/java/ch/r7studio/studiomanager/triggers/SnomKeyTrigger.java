@@ -11,7 +11,7 @@ public class SnomKeyTrigger extends Trigger {
     private String            from_ip;
     
     public SnomKeyTrigger(int address, String from_ip) {
-        super(TriggerType.SnomKEY);
+        super(E_TriggerType.SnomKEY);
         this.address = address;
         this.from_ip = from_ip;
     }
@@ -19,7 +19,7 @@ public class SnomKeyTrigger extends Trigger {
     @Override
     public String getTriggerString() {
         //dbformat is SnomKEY(address)[ip]
-        return TriggerType.SnomKEY.name()+"("+address+")"; //["+from_ip+"]";
+        return E_TriggerType.SnomKEY.name()+"("+address+")"; //["+from_ip+"]";
     }
 
     /**

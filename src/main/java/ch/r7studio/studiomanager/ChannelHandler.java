@@ -4,7 +4,7 @@
  */
 package ch.r7studio.studiomanager;
 
-import ch.r7studio.studiomanager.actions.ActionType;
+import ch.r7studio.studiomanager.actions.E_ActionType;
 import ch.r7studio.studiomanager.actions.BusinessAction;
 import ch.r7studio.studiomanager.actions.CodedSnomLedAction;
 import ch.r7studio.studiomanager.actions.DummyAction;
@@ -78,28 +78,28 @@ public class ChannelHandler implements TriggerListener {
         for (String action : actions) {
             action = action.trim();
             logger.info("action to do: " + action);
-            if (action.startsWith(ActionType.BObj.name())) {
+            if (action.startsWith(E_ActionType.BObj.name())) {
                 //BusinessObject
                 StudioManagerServer.boAgent.doAction(new BusinessAction(action));
             }
             
-            if (action.startsWith(ActionType.SnomLED.name())) {
+            if (action.startsWith(E_ActionType.SnomLED.name())) {
                 //SnomLED(action); --OLD
                 StudioManagerServer.snomAgent.doAction(new CodedSnomLedAction(action));
             }
-            if (action.startsWith(ActionType.ModLCD.name())) {
+            if (action.startsWith(E_ActionType.ModLCD.name())) {
                 StudioManagerServer.modAgent.doAction(new ModLcdAction(action));
             }
-            if (action.startsWith(ActionType.SNMP.name())) {
+            if (action.startsWith(E_ActionType.SNMP.name())) {
                 StudioManagerServer.snmpAgent.doAction(new SnmpAction(action));
             }
-            if (action.startsWith(ActionType.Dummy.name())) {
+            if (action.startsWith(E_ActionType.Dummy.name())) {
                 StudioManagerServer.dummyAgent.doAction(new DummyAction(action));
             }
-            if (action.startsWith(ActionType.MIDI.name())) {
+            if (action.startsWith(E_ActionType.MIDI.name())) {
                //not implemented
             }
-            if (action.startsWith(ActionType.Console.name())) {
+            if (action.startsWith(E_ActionType.Console.name())) {
                 logger.info("ConsoleAction: "+Utils.betweenRundeKlammerInDbString(action));
             }
 

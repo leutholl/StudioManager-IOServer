@@ -8,18 +8,17 @@ package ch.r7studio.studiomanager.actions;
  *
  * @author leutholl
  */
-public enum SnomLedColor {
-    
-    GREEN(1), ORANGE(2), RED(3);
+public enum E_SnomLedFreq {
+
+    OFF(0), ON(1), BLINK(2), BLINK_SLOW(3), BLINK_FAST(4);
     
     private int code;
 
-    private SnomLedColor(int c) {
+    private E_SnomLedFreq(int c) {
         code = c;
     }
 
     public int getCode() {
         return code;
     }
-    
 }

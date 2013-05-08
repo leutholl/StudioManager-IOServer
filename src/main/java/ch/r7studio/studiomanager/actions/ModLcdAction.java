@@ -15,14 +15,14 @@ public class ModLcdAction extends Action {
     private String message = "";
     
     public ModLcdAction(String message) {
-        super(ActionType.ModLCD);
+        super(E_ActionType.ModLCD);
         this.message = Utils.betweenRundeKlammerInDbString(message);
     }
     
 
     @Override
     public String getActionString() {
-         return ActionType.ModLCD.name();
+         return E_ActionType.ModLCD.name();
     }
 
     /**

@@ -20,7 +20,7 @@ import org.hibernate.Transaction;
  *
  * @author leutholl
  */
-public class BusinessAgent implements Agent {
+public class BusinessAgent implements I_InAgent, I_OutAgent {
     
     public List<TriggerListener> listeners = new ArrayList<TriggerListener>();
     
@@ -63,6 +63,10 @@ public class BusinessAgent implements Agent {
         t.commit();
         notifyTrigger(new TriggerEvent(this, new BusinessTrigger(bact.getObjectName(),bact.getValue())));
         return t.wasCommitted();
+    }
+
+    public boolean hasListener() {
+        return (listeners.size() > 0);
     }
     
     
