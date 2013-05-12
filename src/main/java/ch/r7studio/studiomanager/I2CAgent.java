@@ -18,14 +18,14 @@ import org.apache.log4j.Logger;
 public class I2CAgent extends Thread {
 
     private Logger logger = Logger.getLogger(I2CAgent.class);
-    private InetAddress board;
-    private int port;
+    private InetAddress board_ip;
+    private int udp_port;
     private boolean listening = false;
 
-    public I2CAgent(InetAddress board, int port) {
+    public I2CAgent(InetAddress board_ip, int udp_port) {
 
-            this.board = board;
-            this.port = port;
+            this.board_ip = board_ip;
+            this.udp_port = udp_port;
        
     }
 
@@ -41,10 +41,12 @@ public class I2CAgent extends Thread {
 
     public void send(String msg) {
         
+        logger.debug("I2C message: "+msg);
+        
         try {
             DatagramSocket socket = new DatagramSocket();
             DatagramPacket dp = new DatagramPacket(msg.getBytes(), msg.length(),
-                    board, port);
+                    board_ip, udp_port);
             socket.send(dp);
         } catch (SocketException ex) {
             logger.warn(ex);
@@ -59,7 +61,7 @@ public class I2CAgent extends Thread {
  
         DatagramSocket socket;
         try {
-            socket = new DatagramSocket(port);
+            socket = new DatagramSocket(udp_port);
             byte[] buffer = new byte[1024];
             DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
             while (listening) {

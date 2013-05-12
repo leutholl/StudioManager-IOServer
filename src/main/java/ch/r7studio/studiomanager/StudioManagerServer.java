@@ -36,8 +36,10 @@ public class StudioManagerServer {
     protected static MidiAgent      midiAgent  = null;
     protected static ModtronixAgent modAgent   = null;
     protected static DummyAgent     dummyAgent = null;
+    protected static DAENetAgent    daeNetAgent= null;
     protected static SnmpAgent      snmpAgent  = null;
     protected static DMXAgent       dmxAgent   = null;
+    protected static HD44780Agent   lcdAgent   = null;
     protected static BusinessAgent  boAgent    = null;
     protected static RestAgent      restAgent  = null;
     protected static ChannelHandler handler    = null;
@@ -77,12 +79,22 @@ public class StudioManagerServer {
         boAgent = new BusinessAgent();
         boAgent.addListener(handler);
         
-        logger.info(" --> Initializing ModtronixAgent");
+        lcdAgent = new HD44780Agent("192.168.1.190",54126,"40");
+        lcdAgent.initLCD();
+        lcdAgent.lightOff();
+        lcdAgent.lightOn();
+        lcdAgent.clear();
+        lcdAgent.print("Current Time is: ");
+        lcdAgent.locate(2, 1);
+        lcdAgent.print(Utils.getCurrentTimeStamp());
+        
+        
+        //System.exit(0);
+        
+        logger.info(" --> Initializing DMXAgent");
         dmxAgent = new DMXAgent();
-        dmxAgent.doAction(new DMXAction("DMX(1)[192.168.1.185]=a127"));
-        
-        System.exit(0);
-        
+        //dmxAgent.doAction(new DMXAction("DMX(1)[192.168.1.185]=a127"));
+       
         logger.info(" --> Initializing ModtronixAgent");
         modAgent = new ModtronixAgent();
         modAgent.initModule();
@@ -106,31 +118,36 @@ public class StudioManagerServer {
         } else {
             logger.warn(" ----> not using the MIDI Agent");
         }
-        logger.info(" --> Initializing SnmpAgent");
-        snmpAgent = new SnmpAgent();
+        
+        logger.info(" --> Initializing DAENetAgent");
+        daeNetAgent = new DAENetAgent();
         logger.info(" ----> Discovering DAENetIP Boards");
-        if (SnmpAgent.discoverDaeNetIpBoards() > 0) {
+        if (daeNetAgent.discoverDaeNetIpBoards() > 0) {
             logger.info(" ----> using SnmpAgent");
             snmpAgent.addListener(handler);
         } else {
-            logger.warn(" ----> nit using the SnmpAgent");
+            logger.warn(" ----> not using the DAENetAgent");
         }
+        
+        
         logger.info(" --> Initializing SnmpAgent");
+        snmpAgent = new SnmpAgent();
+        snmpAgent.addListener(handler);
         
 
         //logger.info(" --> Initializing DummyAgent");
         //dummyAgent = new DummyAgent();
         //dummyAgent.addListener(handler);
         
-        logger.info("Initializing REST Service");
+        logger.info(" --> Initializing REST Service");
             restAgent = new RestAgent();
-            logger.info("Starting REST Service");
+            logger.info(" ----> Starting REST Service");
             restAgent.start();
             //----------------12345678901234567890
             modAgent.rollLCD("REST Srv.:   started");
-            logger.info("...listening for REST calls on: " + CONFIG.BASE_URI);
+            logger.info(" ----> ...listening for REST calls on: " + CONFIG.BASE_URI);
 
-        logger.info("IOServer running. Call " + CONFIG.BASE_URI + "/ioserver/exit to quit the application");
+        logger.info(StudioManagerServer.class+" running. Call " + CONFIG.BASE_URI + "/ioserver/exit to quit the application");
         logger.info("------------------------------------------------------------------------------");
 
     }
@@ -357,6 +374,15 @@ public class StudioManagerServer {
             Thread.currentThread().setName("main Shutdown Hook");
             try {
                 logger.warn("IOServer Shutdown Hook called.");
+                
+                if (lcdAgent != null) {
+                    lcdAgent.clear();
+                    lcdAgent.print("Shutting down...");
+                    Thread.sleep(1000);
+                    lcdAgent.clear();
+                    lcdAgent.lightOff();
+                }
+                
 
                 //modAgent.clearLCD();
                 //------------------12345678901234567890

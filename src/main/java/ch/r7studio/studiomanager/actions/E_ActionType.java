@@ -10,6 +10,6 @@ package ch.r7studio.studiomanager.actions;
  */
 public enum E_ActionType {
     
-    SnomLED, CodedSnomLED, SnomTEXT, SnomPICTURE, ModLCD, ModPORT, ModI2C, ModRS232, ModUSART, DMX, SNMP, MIDI, Console, Dummy, BObj
+    SnomLED, CodedSnomLED, SnomTEXT, SnomPICTURE, ModLCD, ModPORT, ModI2C, ModRS232, ModUSART, HD44780, DMX, DAENet, SnmpSet, SnmpTrap, MIDI, Console, Dummy, BObj
     
 }

@@ -11,21 +11,21 @@ import java.util.Map;
  *
  * @author leutholl
  */
-public enum E_DMXCommandType {
+public enum E_HD44780CommandType {
 
-    ABSOLUTE_VALUE("a"), RELATIVE_VALUE("r"), INTELLIGENT("i"), SYSTEM("s");
+    TEXT_MSG("t"), BACKLIGHT_CMD("b");
 
     private final String abbreviation;
     // Reverse-lookup map for getting a day from an abbreviation
-    private static final Map<String, E_DMXCommandType> lookup = new HashMap<String, E_DMXCommandType>();
+    private static final Map<String, E_HD44780CommandType> lookup = new HashMap<String, E_HD44780CommandType>();
 
     static {
-        for (E_DMXCommandType d : E_DMXCommandType.values()) {
+        for (E_HD44780CommandType d : E_HD44780CommandType.values()) {
             lookup.put(d.getAbbreviation(), d);
         }
     }
 
-    private E_DMXCommandType(String abbreviation) {
+    private E_HD44780CommandType(String abbreviation) {
         this.abbreviation = abbreviation;
     }
 
@@ -33,10 +33,10 @@ public enum E_DMXCommandType {
         return abbreviation;
     }
 
-    public static E_DMXCommandType get(String abbreviation) {
-        E_DMXCommandType ct = lookup.get(abbreviation);
+    public static E_HD44780CommandType get(String abbreviation) {
+        E_HD44780CommandType ct = lookup.get(abbreviation);
         if (ct==null) {
-            ct = ABSOLUTE_VALUE;
+            ct = TEXT_MSG;
         }
         return ct;
     }

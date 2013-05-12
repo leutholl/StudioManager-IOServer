@@ -11,7 +11,7 @@ import ch.r7studio.studiomanager.Utils;
  *
  * @author leutholl
  */
-public class SnmpAction extends Action {
+public class SnmpTrapAction extends Action {
    
     private String host;
     private int    port         = CONFIG.SNMP_PORT;
@@ -19,16 +19,25 @@ public class SnmpAction extends Action {
     private String strOID;
     private int    value;
     
-    public SnmpAction(String host, String strOID, int value) {
-        super(E_ActionType.SNMP);
+    public SnmpTrapAction(String host, String strOID, int value) {
+        super(E_ActionType.SnmpTrap);
         this.host   = host;
         this.strOID = strOID;
         this.value  = value;
     }
     
-    public SnmpAction(String dbString) {
-        //Snmp(OID)[IP]=Value
-        super(E_ActionType.SNMP);
+    public SnmpTrapAction(String host, int port, String community, String strOID, int value) {
+        super(E_ActionType.SnmpTrap);
+        this.host      = host;
+        this.port      = port;
+        this.community = community;
+        this.strOID    = strOID;
+        this.value     = value;
+    }
+    
+    public SnmpTrapAction(String dbString) {
+        //SnmpTrap(OID)[IP]=Value
+        super(E_ActionType.SnmpTrap);
         this.host = Utils.betweenEckigeKlammerInDbString(dbString);
         this.strOID = Utils.betweenRundeKlammerInDbString(dbString);
         this.value = Integer.parseInt(Utils.rightFromEquals(dbString));   
@@ -36,7 +45,7 @@ public class SnmpAction extends Action {
 
     @Override
     public String getActionString() {
-       return E_ActionType.SNMP.name();
+       return E_ActionType.SnmpTrap.name();
     }
 
     /**

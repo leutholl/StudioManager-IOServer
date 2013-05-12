@@ -9,5 +9,5 @@ package ch.r7studio.studiomanager.triggers;
  * @author leutholl
  */
 public enum E_TriggerType {
-    SnomKEY, SnomREGISTER, ModLCDKEY, ModPORT, ModI2C, ModRS232, ModUSART, SNMP, MIDI, Keyboard, Dummy, BObj
+    SnomKEY, SnomREGISTER, ModLCDKEY, ModPORT, ModI2C, ModRS232, ModUSART, DAENet, SNMP, MIDI, Keyboard, Dummy, BObj
 }

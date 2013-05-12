@@ -5,8 +5,8 @@
 package ch.r7studio.studiomanager;
 
 import ch.r7studio.studiomanager.actions.Action;
-import ch.r7studio.studiomanager.actions.SnmpAction;
-import ch.r7studio.studiomanager.pojo.Daenetip;
+import ch.r7studio.studiomanager.actions.SnmpSetAction;
+import ch.r7studio.studiomanager.actions.SnmpTrapAction;
 import ch.r7studio.studiomanager.triggers.TriggerEvent;
 import ch.r7studio.studiomanager.triggers.TriggerListener;
 import java.io.IOException;
@@ -30,41 +30,27 @@ import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
+//import net.percederberg.mibble.Mib;
 /**
  *
  * @author leutholl
  */
-public class SnmpAgent implements I_OutAgent {
+public class SnmpAgent implements I_OutAgent, I_InAgent {
 
-    public List<TriggerListener> listeners = new ArrayList<TriggerListener>();
+    public List<TriggerListener> listeners;
     private static Logger logger = Logger.getLogger(SnmpAgent.class);
+    private SnmpServer server;
 
     public SnmpAgent() {
+        this.listeners = new ArrayList<TriggerListener>();
+        this.server = new SnmpServer();
     }
 
-    public static int discoverDaeNetIpBoards() {
-        //IOBoard List
-        List<Daenetip> ioboards = (List<Daenetip>) StudioManagerServer.hib_session.createQuery("from Daenetip").list();
-        if (ioboards.isEmpty()) {
-            logger.warn("No IOBoard registered!");
-        } else {
-            logger.info("List of IOBoards:");
-            for (Daenetip io : ioboards) {
-                // handle each IOBoard
-                logger.info("|-> connecting to IOBoard at: " + io.getIp() + "...");
-                String temp = snmpGet(io.getIp(), CONFIG.SNMP_PORT, CONFIG.SNMP_COMMUNITY, ".1.3.6.1.4.1.32111.1.3.4.10");
-                if (temp == null) {
-                    logger.error("...|-> can't reach IOBoard with registered IP: " + io.getIp());
-                } else {
-                    io.setTemp(new Integer(temp));
-                    StudioManagerServer.hib_session.saveOrUpdate(io);
-                    logger.info("...|-> connected to IOBoard at: " + io.getIp() + " of description " + io.getDescription() + ". Temperature is " + io.getTemp() + " C.");
-
-                }
-            }
-        }
-        StudioManagerServer.hib_session.flush();
-        return ioboards.size();
+    public boolean init() {
+        boolean success = true;
+        success &= server.init(this); //for callback
+        success &= server.run();
+        return success;
     }
 
     public static String snmpGet(String ipAddress, int port, String community, String oid) {
@@ -167,41 +153,51 @@ public class SnmpAgent implements I_OutAgent {
         return success;
     }
 
-    public synchronized static void sendTrap(String oid, int value) {
+    public synchronized static boolean sendTrap(String toIP, int port, String oid, int value) {
         try {
             // create a protocol data-unit for the snmp-trap
             PDU trap = new PDU();
-
             trap.setType(PDU.TRAP);
-
             // add the oid
-            trap.add(new VariableBinding(SnmpConstants.snmpTrapOID, new OID(oid)));
+            //trap.add(new VariableBinding(SnmpConstants.snmpTrapOID, new OID(oid)));
+            trap.add(new VariableBinding(new OID(oid), new Integer32(value)));
             // add some nice stuff
             trap.add(new VariableBinding(SnmpConstants.sysUpTime, new TimeTicks(999999)));
 
             // Specify receiver (ip 10.1.1.42, port 162)
-            //Address targetaddress = new UdpAddress("127.0.0.1/16200");
-            Address targetaddress = new UdpAddress("192.168.2.104/16100");
+            Address targetaddress = new UdpAddress(toIP + "/" + port);
+            //Address targetaddress = new UdpAddress("192.168.2.104/16100");
             CommunityTarget target = new CommunityTarget();
             target.setVersion(SnmpConstants.version1);
             target.setAddress(targetaddress);
 
             // Send the trap
             Snmp snmp = new Snmp(new DefaultUdpTransportMapping());
-            snmp.send(trap, target, null, null);
+            ResponseEvent response =  snmp.send(trap, target);
+            logger.debug("Response.getErrorStatus(): "+response.getResponse().getErrorStatus());
+            //TODO see if successful or not
+            
         } catch (IOException ex) {
-            logger.error(ex);
+            logger.warn(ex);
         }
+        return true;
 
     }
 
     public boolean doAction(Action action) {
-        SnmpAction snmpAction = (SnmpAction) action; //cast to SnmpAction
-        return snmpSet(snmpAction.getHost(), snmpAction.getPort(), snmpAction.getCommunity(), snmpAction.getStrOID(), snmpAction.getValue());
+        boolean success = false;
+        if (action instanceof SnmpSetAction) {
+            SnmpSetAction snmpAction = (SnmpSetAction) action; //cast to SnmpSetAction
+            success = snmpSet(snmpAction.getHost(), snmpAction.getPort(), snmpAction.getCommunity(), snmpAction.getStrOID(), snmpAction.getValue());
+        }
+        if (action instanceof SnmpTrapAction) {
+            SnmpTrapAction snmpAction = (SnmpTrapAction) action; //cast to SnmpSetAction
+            success = sendTrap(snmpAction.getHost(),snmpAction.getPort(),snmpAction.getStrOID(),snmpAction.getValue());
+        }
+        return success;
     }
 
     public void notifyTrigger(TriggerEvent event) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public boolean addListener(TriggerListener toAdd) {
@@ -211,9 +207,8 @@ public class SnmpAgent implements I_OutAgent {
     public boolean removeListener(TriggerListener toRemove) {
         return listeners.remove(toRemove);
     }
-    
+
     public boolean hasListener() {
         return (listeners.size() > 0);
     }
-    
 }
